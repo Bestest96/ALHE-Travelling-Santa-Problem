@@ -83,7 +83,7 @@ class Graph:
         min_path = (inf, None,)
         n_permutations = math.factorial(len(self.vertices))
         for i, permutation in enumerate(itertools.permutations(self.vertices)):
-            print(f'{i+1}/{n_permutations}')
+            # print(f'{i+1}/{n_permutations}')
             path_length = self.path_length(permutation)
             if path_length < min_path[0]:
                 min_path = (path_length, permutation,)
