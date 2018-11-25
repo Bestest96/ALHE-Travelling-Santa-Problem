@@ -103,7 +103,7 @@ order <- integer(dim(cities)[1] + 1)
 checked_neighbours <- 10000
 path_length <- 0
 
-for (i in 2:(length(order) - 1)) {
+for (i in 1:(length(order) - 2)) {
   to_check <- setdiff(1:max(cities[,"CityId"]), order)
   if (length(to_check) > checked_neighbours)
     neighbours <- sample(to_check, checked_neighbours)
@@ -112,22 +112,25 @@ for (i in 2:(length(order) - 1)) {
   min_dist <- Inf
   min_neigh <- NA
   for (n in neighbours) {
-    neigh_dist <- dist_cities(cities[order[i - 1] + 1, 'X'],
-                              cities[order[i - 1] + 1, 'Y'],
+    neigh_dist <- dist_cities(cities[order[i] + 1, 'X'],
+                              cities[order[i] + 1, 'Y'],
                               cities[n + 1, 'X'],
                               cities[n + 1, 'Y'])
+    check_dist <- neigh_dist
     if (i %% 10 == 0)
-      if (!(n %in% city_primes))
+      if (!(n %in% city_primes)) {
         neigh_dist <- 1.1 * neigh_dist
+        check_dist <- neigh_dist
+      }
     else
       if (n %in% city_primes)
-        neigh_dist <- 1.1 * neigh_dist
-    if (neigh_dist < min_dist) {
+        check_dist <- 1.1 * check_dist
+    if (check_dist < min_dist) {
       min_neigh <- n
       min_dist <- neigh_dist
     }
   }
-  order[i] <- min_neigh
+  order[i + 1] <- min_neigh
   path_length <- path_length + min_dist
   cat("\r", i, ",", path_length)
 }
