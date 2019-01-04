@@ -3,6 +3,21 @@ dist_cities <- function(x1, y1, x2, y2) {
   return (dist)
 }
 
+manhattan_metric <- function(x1, y1, x2, y2) {
+  dist <- abs(x2 - x1) + abs(y2 - y1)
+  
+  return (dist)
+}
+
+max_metric <- function(x1, y1, x2, y2) {
+  xs <- abs(x2 - x1)
+  ys <- abs(y2 - y1)
+  dist <- cbind(xs, ys)
+  dist <- apply(dist, 1, function(x) max(x))
+  
+  return (dist)
+}
+
 clusterify <- function(X, radius, metric = dist_cities) {
   n_cluster <- 1
   clusters <- vector(length=nrow(X))
@@ -33,7 +48,7 @@ clusterify <- function(X, radius, metric = dist_cities) {
 cities <- read.csv("cities.csv", header = T)
 cities <- cities[,2:3]
 
-clusters <- clusterify(cities, 500)
+clusters <- clusterify(cities, 600, max_metric)
 
 plot(cities, col=clusters)
 points(cities[clusters==0,], pch = 3, col = "grey")
