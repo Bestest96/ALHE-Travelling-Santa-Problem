@@ -123,14 +123,16 @@ clusterify_around_attractors <- function(X,
     neighbourhood_size <- length(neighbours_idxs)
     n_normal_points <- neighbourhood_size - n_attractors
     neighbours_dists <- dists[dists <= radius]
-    
-    n_remove <- n_normal_points - per_attractor * n_attractors
-    if(n_remove >= 0) inverted <- TRUE # removing normal points
-    # removing attractors
-    else{
-      inverted <- FALSE
+  
+    if(n_normal_points - per_attractor * n_attractors >= 0) {
+      inverted <- TRUE # removing normal points
+      n_remove <- n_normal_points - per_attractor * n_attractors
+    }
+    else {
+      inverted <- FALSE # removing attractors
       mod <- n_normal_points %% per_attractor
       n_remove <- n_attractors - (n_normal_points - mod) / per_attractor
+      # remving normal points
       rv <- trim_cluster(mod,
                          attractors,
                          neighbours_idxs,
@@ -171,7 +173,10 @@ cities <- read.csv("cities.csv", header = T)
 cities <- cities[,2:3]
 city_primes <- primes(dim(cities)[1] - 1)
 
-clusters <- clusterify_around_attractors(cities, 500, city_primes, 9)
-
-plot(cities, col=clusters)
-# points(cities[clusters==0,], pch = 3, col = "grey")
+clusterify_cities <- function(radius, per_attractor, plot = TRUE) {
+  clusters = clusterify_around_attractors(cities, radius, city_primes, per_attractor)
+  if(plot){
+    plot(cities, col=clusters)
+    # points(cities[clusters==0,], pch = 3, col = "grey")   
+  }
+}
