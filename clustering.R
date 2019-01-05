@@ -6,6 +6,8 @@ if (!require("sfsmisc")) {
   }
 }
 
+source('colors.R')
+
 printf <- function(...) invisible(print(sprintf(...)))
 
 dist_cities <- function(x1, y1, x2, y2) {
@@ -180,13 +182,21 @@ clusterify_cities <- function(radius,
                               per_attractor, 
                               plot = TRUE, 
                               metric = dist_cities) {
-  clusters = clusterify_around_attractors(cities, 
-                                          radius, 
-                                          city_primes, 
-                                          per_attractor,
-                                          metric = metric)
+  clusters <<- clusterify_around_attractors(cities, 
+                                            radius, 
+                                            city_primes, 
+                                            per_attractor,
+                                            metric = metric)
   if(plot){
-    plot(cities, col=clusters)
-    points(cities[clusters==0,], pch = 3, col = "white")   
+    plot(cities)
+    count <- 1
+    for (i in unique(clusters)) {
+      if(i == 0) {
+        points(cities[clusters==0,], pch = 3, col = "black") 
+        next
+      }
+      points(cities[clusters==i,], pch = 3, col = colors[count])
+      count <- count + 1
+    }
   }
 }
