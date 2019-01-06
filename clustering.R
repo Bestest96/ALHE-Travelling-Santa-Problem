@@ -336,15 +336,16 @@ tune_clusterify_cities <- function(radius = seq(250, 550, 25),
                                    per_attractor = seq(7, 11, 0.1), 
                                    tries = 5,
                                    plot = TRUE, 
-                                   metric = dist_cities) {
+                                   metric = dist_cities,
+                                   post_clusterify = TRUE) {
   if(!plot) {
-    rvs = c()
+    rvs = vector()
     count <- 1
   }
   for (r in radius) {
     for (p in per_attractor) {
       for (i in 1:tries) {
-        rv = clusterify_cities(r, p, plot = plot, id = i)
+        rv = clusterify_cities(r, p, plot = plot, id = i, post_clusterify = post_clusterify)
         if(!plot) {
           rvs[[count]] <- rv
           count <- count + 1
@@ -352,4 +353,6 @@ tune_clusterify_cities <- function(radius = seq(250, 550, 25),
       }
     }
   }
+  
+  if(!plot) return (rvs)
 }
