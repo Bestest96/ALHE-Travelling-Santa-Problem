@@ -131,16 +131,36 @@ trim_cluster <- function(n,
   return (points[-to_remove])
 }
 
+clusterify_noise <- function(X, clusters, attractors, metric = dist_cities) {
+  new_clusters <- clusters
+  X_attractors <- X[attractors,]
+  X_clusterified_attractors <- X_attractors[X_attractors != 0,]
+  clusters_attractors <- clusters[attractors]
+  clusters_clusterified_attractors <- clusters_attractors[X_attractors != 0]
+  for(i in 1:length(clusters)) {
+    if(clusters[i] != 0) next
+    point <- X[i,]
+    dists <- metric(point[[1]], point[[2]], 
+                    X_clusterified_attractors[,1], X_clusterified_attractors[,2])
+    min_idx <- order(dists)[[1]]
+    new_clusters[i] <- clusters_clusterified_attractors[[min_idx]]
+  }
+  
+  return (new_clusters)
+}
+
 "
 Clusterifies points from X.
 
 Args:
   X: A list of points. 
   radius: Base radius of a cluster.
-  metric: Metric to calculate distance between points.
-  attractors: A list of indices of points from X
+  attractors: A list of indices of points from X,
   on which clusters would be concentrated.
   per_attractor: Number of normal points per one attractor.
+  metric: Metric to calculate distance between points.
+  post_clusterify: If true, after main clustering phase,
+    noise points will be assigned to created clusters.
 
 Returns:
   A list of length equal number of points containing
@@ -150,7 +170,8 @@ clusterify_around_attractors <- function(X,
                                          radius,
                                          attractors,
                                          per_attractor,
-                                         metric = dist_cities) {
+                                         metric = dist_cities,
+                                         post_clusterify = TRUE) {
   n_cluster <- 1
   clusters <- vector(length=nrow(X))
   remaining_idxs <- 1:nrow(X)
@@ -212,9 +233,32 @@ clusterify_around_attractors <- function(X,
     remaining_idxs <- union(remaining_idxs, remaining_attractors)
   clusters[remaining_idxs] <- 0
   
+  post_clusters <- NULL
+  if(post_clusterify) {
+    post_clusters <- clusterify_noise(X, clusters, attractors, metric = metric)
+  }
+  
   print(length(remaining_idxs))
   
-  return (list(clusters, length(remaining_idxs)))
+  return (list(clusters, length(remaining_idxs), post_clusters))
+}
+
+plot_clusters <- function(X, 
+                          y, 
+                          params, 
+                          width = 1200, 
+                          height = 800, 
+                          directory = 'plots/') {
+  parsed_params <- paste(params, collapse = '_')
+  name <- paste(directory, "/", parsed_params, ".png", sep = "")
+  png(name, width = width, height = height)
+  
+  plot(X)
+  for (i in unique(y)) {
+    if(i == 0) points(X[y==0,], pch = 3, col = "black") 
+    points(X[y==i,], pch = 19, col = colors[i])
+  }
+  dev.off()
 }
 
 "
@@ -229,7 +273,7 @@ Args:
     [radius]_[per_attractor]_[image_id]_[noise].png
   metric: metric parameter to use in CAA.
   directory: Directory where a plot will be saved.
-  image_id: Id of a plot.
+  id: Id of a plot.
   width: Width of plot.
   height: Height of plot.
 
@@ -238,42 +282,35 @@ Returns:
 "
 clusterify_cities <- function(radius,
                               per_attractor,
-                              plot = FALSE,
+                              post_clusterify = TRUE,
+                              plot = TRUE,
                               metric = dist_cities,
-                              directory = "plots",
-                              image_id = 1,
+                              directory = "plots/",
+                              id = 1,
                               width = 1200,
                               height = 800) {
   rv <- clusterify_around_attractors(cities, 
                                      radius, 
                                      city_primes, 
                                      per_attractor,
-                                     metric = metric)
-  if(plot) {
-    clusters <- rv[[1]]
-    remaining_idxs <- rv[[2]]
-    png(sprintf("%s/%d_%.1f_%d_%d.png", 
-                directory, 
-                radius, 
-                per_attractor, 
-                image_id, 
-                remaining_idxs), 
-        width = width, 
-        height = height)
-    plot(cities)
-    count <- 1
-    for (i in unique(clusters)) {
-      if(i == 0) {
-        points(cities[clusters==0,], pch = 3, col = "black") 
-        next
-      }
-      points(cities[clusters==i,], pch = 3, col = colors[count])
-      count <- count + 1
-    }
-    dev.off()
+                                     metric = metric,
+                                     post_clusterify = post_clusterify)
+  clusters <- rv[[1]]
+  remaining_idxs <- rv[[2]]
+  post_clusters <- rv[[3]]
+  per_attractor_str <- sprintf("%.1f", per_attractor)
+  plot_clusters(cities, 
+                clusters, 
+                c(radius, per_attractor_str, id, remaining_idxs, "noise"),
+                directory = directory)
+  if(post_clusterify) {
+    plot_clusters(cities,
+                  post_clusters,
+                  c(radius, per_attractor_str, id, remaining_idxs, "no_noise"),
+                  directory = directory)
   }
   
-  return (rv)
+  return (list(clusters, remaining_idxs, post_clusters))
 }
 
 "
@@ -307,7 +344,7 @@ tune_clusterify_cities <- function(radius = seq(250, 550, 25),
   for (r in radius) {
     for (p in per_attractor) {
       for (i in 1:tries) {
-        rv = clusterify_cities(r, p, plot = TRUE, image_id = i)
+        rv = clusterify_cities(r, p, plot = plot, id = i)
         if(!plot) {
           rvs[[count]] <- rv
           count <- count + 1
