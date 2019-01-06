@@ -8,6 +8,10 @@ if (!require("sfsmisc")) {
 
 source("colors.R")
 
+cities <- read.csv("cities.csv", header = T)
+cities <- cities[,2:3]
+city_primes <- primes(dim(cities)[1] - 1)
+
 printf <- function(...) invisible(print(sprintf(...)))
 
 dist_cities <- function(x1, y1, x2, y2) {
@@ -31,6 +35,26 @@ max_metric <- function(x1, y1, x2, y2) {
   return (dist)
 }
 
+"
+Clusterifies set of points from X. 
+It pulls points from X as long as there is
+a point not processed yet. New clusters are
+made around those points including all points
+not processed yet and lying not further than 'radius'.
+
+Args:
+  X: Points to cluster.
+  radius: Radius of creating clusters.
+  metric: Metric to use.
+
+Returns:
+  Vector of length equal lenght of X. Each point
+  has assigned one corresponding integer in this vector
+  denoting to which cluster the point belongs. 0 is reserved
+  for points which are isolated and don't form clusters 
+  with any points. Values i>=1 are assigned to all points
+  belonging to the same cluster i.
+"
 clusterify <- function(X, radius, metric = dist_cities) {
   n_cluster <- 1
   clusters <- vector(length=nrow(X))
@@ -59,7 +83,27 @@ clusterify <- function(X, radius, metric = dist_cities) {
 }
 
 "
-Removes n furthest points from a cluster.
+Trims the cluster by n furthest points.
+
+Args:
+  n: Number of points to remove.
+  group: A group of the points. See: inverted.
+  points: Defines the cluster.
+  dists: Distances from some specific point
+    to all the points from the cluster in the
+    same order as they appear in 'points'.
+  inverted: If false, the function trims n
+    furthest points from 'group' which are 
+    present in the cluster. Otherwise, it trims
+    n furthest points NOT belonging to 'group'.
+  return_dists: If true, the function returns also
+    the second value which is 'dist' only those
+    points which are still in the cluster after trimming.
+
+Returns:
+  A vector without n furthest points. Or, if 'return_dists'
+  is true, it returns also the second value: 'dists' without
+  removed points.
 "
 trim_cluster <- function(n, 
                          group, 
@@ -173,41 +217,101 @@ clusterify_around_attractors <- function(X,
   return (list(clusters, length(remaining_idxs)))
 }
 
-cities <- read.csv("cities.csv", header = T)
-cities <- cities[,2:3]
-city_primes <- primes(dim(cities)[1] - 1)
+"
+Clusterifies cities using 'clusterifies_around_attractors',
+in short CAA.
 
-clusterify_cities <- function(radius = seq(250, 550, 25), 
-                              per_attractor = seq(7, 11, 0.1), 
-                              tries = 5,
-                              plot = TRUE, 
-                              metric = dist_cities) {
+Args:
+  radius: radius parameter to use in CAA. 
+  per_attractor: per_attractor parameter to use in CAA.
+  plot: If true, plot is made. Plots name follows 
+  the naming rule:
+    [radius]_[per_attractor]_[image_id]_[noise].png
+  metric: metric parameter to use in CAA.
+  directory: Directory where a plot will be saved.
+  image_id: Id of a plot.
+  width: Width of plot.
+  height: Height of plot.
+
+Returns:
+  Result from CAA.
+"
+clusterify_cities <- function(radius,
+                              per_attractor,
+                              plot = FALSE,
+                              metric = dist_cities,
+                              directory = "plots",
+                              image_id = 1,
+                              width = 1200,
+                              height = 800) {
+  rv <- clusterify_around_attractors(cities, 
+                                     radius, 
+                                     city_primes, 
+                                     per_attractor,
+                                     metric = metric)
+  if(plot) {
+    clusters <- rv[[1]]
+    remaining_idxs <- rv[[2]]
+    png(sprintf("%s/%d_%.1f_%d_%d.png", 
+                directory, 
+                radius, 
+                per_attractor, 
+                image_id, 
+                remaining_idxs), 
+        width = width, 
+        height = height)
+    plot(cities)
+    count <- 1
+    for (i in unique(clusters)) {
+      if(i == 0) {
+        points(cities[clusters==0,], pch = 3, col = "black") 
+        next
+      }
+      points(cities[clusters==i,], pch = 3, col = colors[count])
+      count <- count + 1
+    }
+    dev.off()
+  }
+  
+  return (rv)
+}
+
+"
+Launches clusterify_cities for many sets of parameters.
+
+Args:
+  radius: Sequence of radius values to use in 
+    clusterify_cities.
+  per_attractor: Sequence of per_attractor values
+    to use in clusterify_cities.
+  tries: Number of tries per a set of parameters.
+  plot: If true, a plot is creating for each set of
+    parameters. Else, the function accumulates all
+    results from clusterify_cities in one vector.
+  metric: Metric to use in clusterify_cities.
+
+Returns:
+  If plot is true, it returns nothing. If not,
+  it returns a vector of results from cluserify_cities
+  for all sets of parameters.
+"
+tune_clusterify_cities <- function(radius = seq(250, 550, 25), 
+                                   per_attractor = seq(7, 11, 0.1), 
+                                   tries = 5,
+                                   plot = TRUE, 
+                                   metric = dist_cities) {
+  if(!plot) {
+    rvs = c()
+    count <- 1
+  }
   for (r in radius) {
-    for (p in p.a) {
+    for (p in per_attractor) {
       for (i in 1:tries) {
-        rv <- clusterify_around_attractors(cities, 
-                                           r, 
-                                           city_primes, 
-                                           p,
-                                           metric = metric)
-        clusters <- rv[[1]]
-        remaining_idxs <- rv[[2]]
-        if(plot){
-          png(sprintf("plots/%d_%.1f_%d_%d.png", r, p, i, remaining_idxs), 
-              width = 1200, 
-              height = 800)
-          plot(cities)
-          count <- 1
-          for (i in unique(clusters)) {
-            if(i == 0) {
-              points(cities[clusters==0,], pch = 3, col = "black") 
-              next
-            }
-            points(cities[clusters==i,], pch = 3, col = colors[count])
-            count <- count + 1
-          }
-          dev.off()
-        }  
+        rv = clusterify_cities(r, p, plot = TRUE, image_id = i)
+        if(!plot) {
+          rvs[[count]] <- rv
+          count <- count + 1
+        }
       }
     }
   }
