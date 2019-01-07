@@ -241,7 +241,7 @@ clusterify <- function(X,
 
 plot_clusters <- function(X, 
                           y, 
-                          params, 
+                          params = c("clusters"), 
                           width = 1200, 
                           height = 800, 
                           directory = 'plots/') {
