@@ -1,5 +1,3 @@
-source("load_cities.R")
-
 x_axis_angle <- function(vs) {
   p1s.x <- vs[,1]
   p1s.y <- vs[,2]

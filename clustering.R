@@ -7,7 +7,6 @@ if (!require("sfsmisc")) {
 }
 
 source("colors.R")
-source("load_cities.R")
 
 printf <- function(...) invisible(print(sprintf(...)))
 
@@ -52,7 +51,7 @@ Returns:
   with any points. Values i>=1 are assigned to all points
   belonging to the same cluster i.
 "
-clusterify <- function(X, radius, metric = dist_cities) {
+simple_clusterify <- function(X, radius, metric = dist_cities) {
   n_cluster <- 1
   clusters <- vector(length=nrow(X))
   remaining_idxs <- 1:nrow(X)
@@ -163,12 +162,12 @@ Returns:
   A list of length equal number of points containing
   integers which indicate cluster membership of points.
 "
-clusterify_around_attractors <- function(X, 
-                                         radius,
-                                         attractors,
-                                         per_attractor,
-                                         metric = dist_cities,
-                                         post_clusterify = TRUE) {
+clusterify <- function(X, 
+                       radius,
+                       per_attractor,
+                       attractors,
+                       metric = dist_cities,
+                       post_clusterify = TRUE) {
   n_cluster <- 1
   clusters <- vector(length=nrow(X))
   remaining_idxs <- 1:nrow(X)
@@ -277,31 +276,32 @@ Args:
 Returns:
   Result from CAA.
 "
-clusterify_cities <- function(radius,
-                              per_attractor,
-                              post_clusterify = TRUE,
-                              plot = TRUE,
-                              metric = dist_cities,
-                              directory = "plots/",
-                              id = 1,
-                              width = 1200,
-                              height = 800) {
-  rv <- clusterify_around_attractors(cities, 
-                                     radius, 
-                                     city_primes, 
-                                     per_attractor,
-                                     metric = metric,
-                                     post_clusterify = post_clusterify)
+clusterify_and_plot <- function(X,
+                                radius,
+                                per_attractor,
+                                attractors,
+                                post_clusterify = TRUE,
+                                metric = dist_cities,
+                                directory = "plots/",
+                                id = 1,
+                                width = 1200,
+                                height = 800) {
+  rv <- clusterify(X, 
+                   radius, 
+                   city_primes, 
+                   per_attractor,
+                   metric = metric,
+                   post_clusterify = post_clusterify)
   clusters <- rv[[1]]
   remaining_idxs <- rv[[2]]
   post_clusters <- rv[[3]]
   per_attractor_str <- sprintf("%.1f", per_attractor)
-  plot_clusters(cities, 
+  plot_clusters(X, 
                 clusters, 
                 c(radius, per_attractor_str, id, remaining_idxs, "noise"),
                 directory = directory)
   if(post_clusterify) {
-    plot_clusters(cities,
+    plot_clusters(X,
                   post_clusters,
                   c(radius, per_attractor_str, id, remaining_idxs, "no_noise"),
                   directory = directory)
@@ -329,12 +329,17 @@ Returns:
   it returns a vector of results from cluserify_cities
   for all sets of parameters.
 "
-tune_clusterify_cities <- function(radius = seq(250, 550, 25), 
-                                   per_attractor = seq(7, 11, 0.1), 
-                                   tries = 5,
-                                   plot = TRUE, 
-                                   metric = dist_cities,
-                                   post_clusterify = TRUE) {
+tune_clusterify <- function(X,
+                            radius, 
+                            per_attractor,
+                            attractors,
+                            tries = 5,
+                            metric = dist_cities,
+                            post_clusterify = TRUE,
+                            plot = TRUE,
+                            directory = 'plots/',
+                            width = 1200,
+                            height = 800) {
   if(!plot) {
     rvs = vector()
     count <- 1
@@ -342,10 +347,27 @@ tune_clusterify_cities <- function(radius = seq(250, 550, 25),
   for (r in radius) {
     for (p in per_attractor) {
       for (i in 1:tries) {
-        rv = clusterify_cities(r, p, plot = plot, id = i, post_clusterify = post_clusterify)
         if(!plot) {
+          rv = clusterify(X, 
+                          r, 
+                          p, 
+                          attractors, 
+                          post_clusterify = post_clusterify, 
+                          metric = metric)
           rvs[[count]] <- rv
           count <- count + 1
+        }
+        else{
+          clusterify_and_plot(X, 
+                              radius, 
+                              per_attractor, 
+                              attractors,
+                              post_clusterify = post_clusterify, 
+                              metric = metric, 
+                              directory = directory, 
+                              id = i,
+                              width = width,
+                              height = height)
         }
       }
     }
