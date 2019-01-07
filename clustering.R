@@ -7,10 +7,7 @@ if (!require("sfsmisc")) {
 }
 
 source("colors.R")
-
-cities <- read.csv("cities.csv", header = T)
-cities <- cities[,2:3]
-city_primes <- primes(dim(cities)[1] - 1)
+source("load_cities.R")
 
 printf <- function(...) invisible(print(sprintf(...)))
 
