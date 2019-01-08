@@ -28,8 +28,8 @@ clusterify_and_plot_cities <- function(radius,
                       height = height)
 }
 
-tune_clusterify_cities <- function(radius, 
-                                   per_attractor,
+tune_clusterify_cities <- function(radius = seq(250, 500, 25), 
+                                   per_attractor = seq(7, 11, 0.1),
                                    tries = 5,
                                    metric = dist_cities,
                                    post_clusterify = TRUE,

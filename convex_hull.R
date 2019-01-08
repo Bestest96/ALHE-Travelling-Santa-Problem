@@ -1,3 +1,11 @@
+if (!require("dequer")) {
+  print("dequer not found! Installing.")
+  install.packages("dequer")
+  if (!require("dequer")) {
+    stop("Cannot install ")
+  }
+}
+
 x_axis_angle <- function(vs) {
   p1s.x <- vs[,1]
   p1s.y <- vs[,2]
