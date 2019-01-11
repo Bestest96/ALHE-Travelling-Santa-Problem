@@ -1,5 +1,5 @@
 source("clustering.R")
-source("utils.R")
+source("load_cities.R")
 
 clusterify_cities <- function(radius,
                               per_attractor,
