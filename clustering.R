@@ -130,11 +130,10 @@ trim_cluster <- function(n,
 clusterify_noise <- function(X, clusters, attractors, metric = dist_cities) {
   new_clusters <- clusters
   X_attractors <- X[attractors,]
-  X_clusterified_attractors <- X_attractors[X_attractors != 0,]
   clusters_attractors <- clusters[attractors]
-  clusters_clusterified_attractors <- clusters_attractors[X_attractors != 0]
-  for(i in 1:length(clusters)) {
-    if(clusters[i] != 0) next
+  X_clusterified_attractors <- X_attractors[clusters_attractors != 0,]
+  clusters_clusterified_attractors <- clusters_attractors[clusters_attractors != 0]
+  for(i in which(clusters == 0)) {
     point <- X[i,]
     dists <- metric(point[[1]], point[[2]], 
                     X_clusterified_attractors[,1], X_clusterified_attractors[,2])
@@ -168,6 +167,7 @@ clusterify <- function(X,
                        attractors,
                        metric = dist_cities,
                        post_clusterify = TRUE) {
+  attractors <- attractors + 1
   n_cluster <- 1
   clusters <- vector(length=nrow(X))
   remaining_idxs <- 1:nrow(X)
@@ -208,7 +208,6 @@ clusterify <- function(X,
                                     inverted = inverted)
     
     clusters[neighbours_idxs] <- n_cluster
-    n_cluster <- n_cluster +  1
     
     cluster_attractors <- intersect(neighbours_idxs, attractors)
     remaining_attractors <- setdiff(remaining_attractors, cluster_attractors)
@@ -222,14 +221,16 @@ clusterify <- function(X,
            n_normal_points)
     if (length(remaining_attractors) - old.length == 0)
       not.changed <- not.changed + 1
-    else
+    else{
       not.changed <- 0
+      n_cluster <- n_cluster +  1
+    }
   }
   if (not.changed == 0)
     remaining_idxs <- union(remaining_idxs, remaining_attractors)
   clusters[remaining_idxs] <- 0
   
-  post_clusters <- NULL
+  post_clusters <- clusters
   if(post_clusterify) {
     post_clusters <- clusterify_noise(X, clusters, attractors, metric = metric)
   }
@@ -241,7 +242,7 @@ clusterify <- function(X,
 
 plot_clusters <- function(X, 
                           y, 
-                          params, 
+                          params = c("clusters"), 
                           width = 1200, 
                           height = 800, 
                           directory = 'plots/') {
@@ -288,8 +289,8 @@ clusterify_and_plot <- function(X,
                                 height = 800) {
   rv <- clusterify(X, 
                    radius, 
-                   city_primes, 
                    per_attractor,
+                   city_primes,
                    metric = metric,
                    post_clusterify = post_clusterify)
   clusters <- rv[[1]]
@@ -300,7 +301,7 @@ clusterify_and_plot <- function(X,
                 clusters, 
                 c(radius, per_attractor_str, id, remaining_idxs, "noise"),
                 directory = directory)
-  if(post_clusterify) {
+  if(F && post_clusterify) { # CHANGE
     plot_clusters(X,
                   post_clusters,
                   c(radius, per_attractor_str, id, remaining_idxs, "no_noise"),
@@ -359,8 +360,8 @@ tune_clusterify <- function(X,
         }
         else{
           clusterify_and_plot(X, 
-                              radius, 
-                              per_attractor, 
+                              r, 
+                              p, 
                               attractors,
                               post_clusterify = post_clusterify, 
                               metric = metric, 
