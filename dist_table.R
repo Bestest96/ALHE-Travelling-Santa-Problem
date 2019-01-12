@@ -1,5 +1,4 @@
 source("convex_hull.R")
-source("clusterify_cities.R")
 
 min_dist_pair <- function(points1, points2) {
   n <- dim(points1)[1]
@@ -40,5 +39,15 @@ create_cluster_dist_table <- function(points, clusters) {
     print(i/n_clusters * 100)
   }
 
+  for(i in 1:n_clusters) {
+    for(j in 1:i) {
+      if(i == j){
+        rv[i,j,] = c(0,0,0,0)
+        next
+      }
+      rv[i,j,] = rv[j,i,]
+    }
+  }
+  
   return (rv)
 }
