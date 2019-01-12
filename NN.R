@@ -1,13 +1,9 @@
 source("load_cities.R")
 
-NEIGH_TO_CHECK <- 10
+NEIGH_TO_CHECK <- 10000000
 
-find.city <- function(x, y) {
-  for (i in 1:dim(cities)[1]) {
-    if (isTRUE(all.equal(cities[i,][[1]], x, tolerance = 1e-30)) && isTRUE(all.equal(cities[i,][[2]], y, tolerance = 1e-30)))
-      return (i - 1)
-  }
-  return (NULL)
+find.city <- function(x, y, eps = 1e-30) {
+  return (intersect(which(abs(cities[,][[1]] - x) <= eps), which(abs(cities[,][[2]] - y) <= eps)) - 1)
 }
 
 NN <- function(clusters, c.order, dt) {
@@ -27,8 +23,8 @@ NN <- function(clusters, c.order, dt) {
   print(start.city)
   print(end.city)
   i <- 1
+  to_check <- setdiff(which(clusters == c.order[1]) - 1, c(start.city, end.city))
   while (counter < length(order)) {
-    to_check <- setdiff(which(clusters == c.order[i]) - 1, c(order, start.city, end.city))
     if (length(to_check) > NEIGH_TO_CHECK) {
       to_check <- sample(to_check, NEIGH_TO_CHECK)
     }
@@ -48,6 +44,7 @@ NN <- function(clusters, c.order, dt) {
       i <- i + 1
       order[counter + 1] <- start.city
       counter <- counter + 2
+      to_check <- setdiff(which(clusters == c.order[i]) - 1, c(start.city, end.city))
       print(start.city)
       print(end.city)
       next
@@ -70,6 +67,7 @@ NN <- function(clusters, c.order, dt) {
     min_dist <- dists[min_indx]
     min_neigh <- to_check[min_indx]
     order[counter] <- min_neigh
+    to_check <- setdiff(to_check, min_neigh)
     counter <- counter + 1
     cat("\r", counter)
   }
