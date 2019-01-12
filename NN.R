@@ -22,7 +22,7 @@ NN <- function(clusters, c.order, dt) {
   if (start.city == end.city) {
     pair <- (change.counter) %% 2 + 1
     change.counter <- change.counter + 1
-    end.city <- find.city(dt[c.order[i + 1], c.order[i + 2], pair,][[1]], dt[c.order[i + 1], c.order[i + 2], pair,][[2]])
+    end.city <- find.city(dt[c.order[1], c.order[2], pair,][[1]], dt[c.order[1], c.order[2], pair,][[2]])
   }
   print(start.city)
   print(end.city)
