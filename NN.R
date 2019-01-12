@@ -4,7 +4,7 @@ NEIGH_TO_CHECK <- 10
 
 find.city <- function(x, y) {
   for (i in 1:dim(cities)[1]) {
-    if (isTRUE(all.equal(cities[i,][[1]], x)) && isTRUE(all.equal(cities[i,][[2]], y)))
+    if (isTRUE(all.equal(cities[i,][[1]], x, tolerance = 1e-30)) && isTRUE(all.equal(cities[i,][[2]], y, tolerance = 1e-30)))
       return (i - 1)
   }
   return (NULL)
@@ -15,8 +15,16 @@ NN <- function(clusters, c.order, dt) {
   order[1] <- 0
   order[length(order)] <- 0
   counter <- 2
+  pair <- 1
+  change.counter <- 1
   start.city <- 0
-  end.city <- find.city(dt[c.order[1], c.order[2],][[1]], dt[c.order[1], c.order[2],][[2]]) # p1.x p1.y 
+  end.city <- find.city(dt[c.order[1], c.order[2], 1,][[1]], dt[c.order[1], c.order[2], 1,][[2]]) # p1.x p1.y 
+  if (start.city == end.city) {
+    pair <- (change.counter) %% 2 + 1
+    change.counter <- change.counter + 1
+    end.city <- find.city(dt[c.order[i + 1], c.order[i + 2], pair,][[1]], dt[c.order[i + 1], c.order[i + 2], pair,][[2]])
+  }
+  print(start.city)
   print(end.city)
   i <- 1
   while (counter < length(order)) {
@@ -26,11 +34,21 @@ NN <- function(clusters, c.order, dt) {
     }
     if (length(to_check) == 0) {
       order[counter] <- end.city
-      start.city <- find.city(dt[c.order[i], c.order[i + 1],][[3]], dt[c.order[i], c.order[i + 1],][[4]])
-      order[counter + 1] <- start.city
-      end.city <- find.city(dt[c.order[i + 1], c.order[i + 2],][[1]], dt[c.order[i + 1], c.order[i + 2],][[2]])
+      start.city <- find.city(dt[c.order[i], c.order[i + 1], pair,][[3]], dt[c.order[i], c.order[i + 1], pair,][[4]])
+      end.city <- find.city(dt[c.order[i + 1], c.order[i + 2], pair,][[1]], dt[c.order[i + 1], c.order[i + 2], pair,][[2]])
+      if (is.null(end.city))
+        end.city = 0
+      if (start.city == end.city) {
+        pair <- (change.counter) %% 2 + 1
+        change.counter <- change.counter + 1
+        end.city <- find.city(dt[c.order[i + 1], c.order[i + 2], pair,][[1]], dt[c.order[i + 1], c.order[i + 2], pair,][[2]])
+        if (is.null(end.city))
+          end.city = 0
+      }
       i <- i + 1
+      order[counter + 1] <- start.city
       counter <- counter + 2
+      print(start.city)
       print(end.city)
       next
     }
