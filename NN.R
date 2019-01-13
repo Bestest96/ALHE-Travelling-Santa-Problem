@@ -70,7 +70,7 @@ NN <- function(clusters, c.order, dt) {
     counter <- counter + 1
     cat("\r", counter)
   }
-  
+  cat ("\n")
   return (order)
 }
 
