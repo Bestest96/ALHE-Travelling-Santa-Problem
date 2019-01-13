@@ -47,6 +47,7 @@ NN <- function(clusters, c.order, dt) {
       to_check <- setdiff(which(clusters == c.order[i]) - 1, c(start.city, end.city))
       print(start.city)
       print(end.city)
+      print(corder[i])
       next
     }
     # [, , , , ,]
