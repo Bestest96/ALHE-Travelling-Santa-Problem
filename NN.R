@@ -23,8 +23,6 @@ NN <- function(clusters, c.order, dt) {
     change.counter <- change.counter + 1
     end.city <- find.city(dt[c.order[1], c.order[2], pair,][[1]], dt[c.order[1], c.order[2], pair,][[2]])
   }
-  print(start.city)
-  print(end.city)
   i <- 1
   to_check <- setdiff(which(clusters == c.order[1]) - 1, c(start.city, end.city))
   while (counter < length(order)) {
@@ -48,9 +46,6 @@ NN <- function(clusters, c.order, dt) {
       order[counter + 1] <- start.city
       counter <- counter + 2
       to_check <- setdiff(which(clusters == c.order[i]) - 1, c(start.city, end.city))
-      print(start.city)
-      print(end.city)
-      print(corder[i])
       next
     }
     # [, , , , ,]
@@ -77,4 +72,34 @@ NN <- function(clusters, c.order, dt) {
   }
   
   return (order)
+}
+
+SA <- function (clusters, c.order, dt, temp = 100, t.eps = 0.99999, iterations = 10000) {
+  best.order <- NN(clusters, c.order, dt)
+  best.corder <- c.order
+  best.length <- pathLength(best.order, cities, city_primes)$length
+  cur.length <- best.length
+  cur.order <- best.order
+  for (i in 1:iterations) {
+    neighs <- sample(2:(length(c.order) - 1), 2)
+    new.corder <- c.order
+    tmp <- new.corder[neighs[1]]
+    new.corder[neighs[1]] <- new.corder[neighs[2]]
+    new.corder[neighs[2]] <- tmp
+    new.order <- NN(clusters, new.corder, dt)
+    path <- pathLength(new.order, cities, city_primes)
+    if (path$length < cur.length || runif(1, min = 0, max = 1) < exp(-abs(path$length - cur.length) /  temp)) {
+      cur.length <- path$length
+      c.order <- new.corder
+      cur.order <- new.order
+      if (path$length < best.length) {
+        best.length <- path$length
+        best.corder <- new.corder
+        best.order <- new.order
+      }
+    }
+    temp <- temp * t.eps
+    print.info(c(path$length, cur.length, best.length, temp))
+  }
+  return (list(order = best.order, corder = best.corder, length = best.length))
 }
