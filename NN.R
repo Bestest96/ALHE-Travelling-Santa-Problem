@@ -75,9 +75,9 @@ NN <- function(clusters, c.order, dt) {
 }
 
 SA <- function (clusters, c.order, dt, temp = 100, t.eps = 0.99999, iterations = 10000) {
-  best.order <- NN(clusters, c.order, dt)
-  best.corder <- c.order
-  best.length <- pathLength(best.order, cities, city_primes)$length
+  best.order <<- NN(clusters, c.order, dt)
+  best.corder <<- c.order
+  best.length <<- pathLength(best.order, cities, city_primes)$length
   cur.length <- best.length
   cur.order <- best.order
   for (i in 1:iterations) {
@@ -93,9 +93,9 @@ SA <- function (clusters, c.order, dt, temp = 100, t.eps = 0.99999, iterations =
       c.order <- new.corder
       cur.order <- new.order
       if (path$length < best.length) {
-        best.length <- path$length
-        best.corder <- new.corder
-        best.order <- new.order
+        best.length <<- path$length
+        best.corder <<- new.corder
+        best.order <<- new.order
       }
     }
     temp <- temp * t.eps
