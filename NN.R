@@ -6,8 +6,7 @@ find.city <- function(x, y, eps = 1e-30) {
   toRet <- intersect(which(abs(cities[,][[1]] - x) <= eps), which(abs(cities[,][[2]] - y) <= eps)) - 1
   if (length(toRet) == 1)
     return (toRet)
-  else
-    return (NULL)
+  return (NULL)
 }
 
 NN <- function(clusters, c.order, dt) {
