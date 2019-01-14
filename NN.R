@@ -103,3 +103,43 @@ SA <- function (clusters, c.order, dt, temp = 100, t.eps = 0.99999, iterations =
   }
   return (list(order = best.order, corder = best.corder, length = best.length))
 }
+
+create_initial_corder <- function(clusters, dt) {
+  c.order <- prepare_corder(clusters)
+  c.order <- cluster_NN(c.order, clusters, dt)
+  
+  return (c.order)
+}
+
+prepare_corder <- function(clusters) {
+  city0_cluster <- clusters[1]
+  dists <- dist_cities(cities[1,1], cities[1,2], cities[,1], cities[,2])
+  closest_city_idx <- intersect(order(dists), which(clusters != city0_cluster))[1]
+  closest_city_cluster <- clusters[closest_city_idx]
+  c.order <- 1:max(clusters)
+  c.order[1] <- city0_cluster
+  c.order[city0_cluster] <- 1
+  c.order[max(clusters)] <- closest_city_cluster
+  c.order[closest_city_cluster] <- max(clusters)
+}
+
+cluster_NN <- function(initial_corder, clusters, dt) {
+  c.order[1] <- initial_corder[1]
+  c.order[length(initial_corder)] <- initial_corder[length(initial_corder)]
+  counter <- 2
+  to_check <- initial_corder[2:(length(initial_corder)-1)]
+  while(counter <= length(initial_corder)-1) {
+    if(length(to_check) == 1) {
+      c.order[counter] <- to_check
+      break
+    }
+    pairs <- dt[c.order[counter-1],to_check,1,]
+    dists <- dist_cities(pairs[,1], pairs[,2], pairs[,3], pairs[,4])
+    closest_cluster <- to_check[order(dists)[1]]
+    c.order[counter] <- closest_cluster
+    to_check <- setdiff(to_check, closest_cluster)
+    counter <- counter + 1
+  }
+  
+  return (c.order)
+}
