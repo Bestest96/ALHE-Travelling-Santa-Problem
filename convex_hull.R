@@ -94,3 +94,33 @@ calculate_convex_hull <- function(points) {
 
   return (rv)
 }
+
+calculate_convex_hull_2 <- function(points) {
+  min_point_idx <- find_min_point_idx(points)
+  min_point <- points[min_point_idx,]
+  points <- points[-min_point_idx,]
+  
+  O <- c(min_point[[1]], min_point[[2]])
+  points <- points[angle_sort(points, O),]
+  
+  convex_hull <- stack()
+  push(convex_hull, O)
+  push(convex_hull, c(points[1,1], points[1,2]))
+  push(convex_hull, c(points[2,1], points[2,2]))
+  
+  for(i in 3:dim(points)[1]) {
+    point <- c(points[i,1], points[i,2])
+    while(counterclockwise_check(peek_second(convex_hull),
+                                 peek_first(convex_hull),
+                                 point) > 0) {
+      pop(convex_hull)
+    }
+    
+    push(convex_hull, point)
+  }
+  
+  rv <- unlist(as.list(convex_hull))
+  rv <- matrix(rv, ncol = 2, byrow = TRUE)
+  
+  return (rv)
+}
