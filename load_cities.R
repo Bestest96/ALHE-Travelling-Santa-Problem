@@ -6,12 +6,16 @@ if (!require("sfsmisc")) {
   }
 }
 
+cities <- read.csv("cities.csv", header = T)
+cities <- cities[,2:3]
+city_primes <- primes(dim(cities)[1] - 1)
+
 dist_cities <- function(x1, y1, x2, y2) {
   dist <- sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2)
   return (dist)
 }
 
-pathLength <- function(ord, cities, city_primes, toChange = NULL, old_length = NULL, old_paths = NULL) {
+pathLength <- function(ord, cities = cities, city_primes = city_primes, toChange = NULL, old_length = NULL, old_paths = NULL) {
   len <- 0.0
   if (is.null(toChange)) {
     paths <- double(length(ord) - 1)
@@ -84,7 +88,3 @@ print.info <- function(params, logger = NULL) {
   if (!is.null(logger))
     write(paste(params, collapse = '\t'), logger, sep = '\t', append = T)
 }
-
-cities <- read.csv("cities.csv", header = T)
-cities <- cities[,2:3]
-city_primes <- primes(dim(cities)[1] - 1)
