@@ -99,7 +99,7 @@ SA <- function (clusters, c.order, dt, temp = 100, t.eps = 0.99999, iterations =
       }
     }
     temp <- temp * t.eps
-    print.info(c(path$length, cur.length, best.length, temp))
+    print.info(c(path$length, cur.length, best.length, temp), logger = "logs/SA.log")
   }
   return (list(order = best.order, corder = best.corder, length = best.length))
 }
@@ -121,9 +121,12 @@ prepare_corder <- function(clusters) {
   c.order[city0_cluster] <- 1
   c.order[max(clusters)] <- closest_city_cluster
   c.order[closest_city_cluster] <- max(clusters)
+  
+  return (c.order)
 }
 
 cluster_NN <- function(initial_corder, clusters, dt) {
+  c.order <- c()
   c.order[1] <- initial_corder[1]
   c.order[length(initial_corder)] <- initial_corder[length(initial_corder)]
   counter <- 2
