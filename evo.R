@@ -23,7 +23,7 @@ basic_reproduce <- function(P, lambda) {
 }
 
 threshold_reproduce <- function(P, lambda, fi) {
-  P_best <- select_n_best(P, fi*length(P))
+  P_best <- P[select_n_best(P, fi*length(P))]
   total <- length(P) + lambda
   R <- sample(P_best, replace = T)
   
@@ -33,9 +33,10 @@ threshold_reproduce <- function(P, lambda, fi) {
 tourney_reproduce <- function(P, lambda, s) {
   mi <- length(P)
   probs <- 1:mi
-  probs <- sapply(probs, function(i){(mi-u+1)^s - (mi-i)^2})
+  probs <- sapply(probs, function(i){(mi-i+1)^s - (mi-i)^2})
   probs <- probs/(mi^s)
-  R <- sample(P, prob = probs)
+  P_sorted <- P[select_n_best(P, length(P))]
+  R <- sample(P_sorted, prob = probs)
   
   return (R)
 }
