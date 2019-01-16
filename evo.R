@@ -1,10 +1,10 @@
-generate_population <- function(clusters, mi) {
+generate_population <- function(clusters, dt, mi) {
   n_clusters <- max(clusters)
   P <- list()
   to_sample <- setdiff(1:n_clusters, clusters[1])
   for(i in 1:mi) {
     c.order <- c(clusters[1], sample(to_sample))
-    length <- pathLength(NN(clusters, c.order, dt))
+    length <- pathLength(NN(clusters, c.order, dt))$length
     P[[i]] <- list(c.order = c.order, length = length)
   }
   
@@ -12,7 +12,8 @@ generate_population <- function(clusters, mi) {
 }
 
 basic_reproduce <- function(P, lambda) {
-  scores <- sapply(P, function(x){length})
+  scores <- sapply(P, function(x){x$length})
+  scores <- scores/max(scores)
   scores <- exp(scores)
   scores <- scores / sum(scores)
   
@@ -23,20 +24,22 @@ basic_reproduce <- function(P, lambda) {
 }
 
 threshold_reproduce <- function(P, lambda, fi) {
-  P_best <- P[select_n_best(P, fi*length(P))]
+  P_best <- select_n_best(P, fi*length(P))
   total <- length(P) + lambda
-  R <- sample(P_best, replace = T)
+  R <- sample(P_best, total, replace = T)
   
   return (R)
 }
 
 tourney_reproduce <- function(P, lambda, s) {
   mi <- length(P)
-  probs <- 1:mi
-  probs <- sapply(probs, function(i){(mi-i+1)^s - (mi-i)^2})
-  probs <- probs/(mi^s)
-  P_sorted <- P[select_n_best(P, length(P))]
-  R <- sample(P_sorted, prob = probs)
+  P_sorted <- select_n_best(P, mi)
+  R <- list()
+  for(i in 1:(mi+lambda)) {
+    tourney <- sample(P_sorted, s, replace = T)
+    best <- select_n_best(tourney, 1)[[1]]
+    R[[i]] <- best
+  } 
   
   return (R)
 }
@@ -75,7 +78,7 @@ cross <- function(R, X, clusters, dt) {
       }
       to_fill <- setdiff(corder_1[-1], used)
       new_corder[idxs_to_fill] <- sample(to_fill)
-      C[[organism]] <- list(c.order = new_corder, length = pathLength(NN(clusters, new_corder, dt))) 
+      C[[organism]] <- list(c.order = new_corder, length = pathLength(NN(clusters, new_corder, dt))$length) 
       
       counter <- counter + 2
     }
@@ -94,21 +97,32 @@ mutate <- function(C) {
 }
 
 succession <- function(P, O) {
-  new_P <- O
-  n_elites <- max(0, length(P) - length(O))
-  idxs_sorted_P <- select_n_best(P, length(P))
-  counter <- 1
-  while(counter <= n_elites) {
-    new_P[[length(O) + counter]] <- P[[idxs_sorted_P[counter]]]
-    counter <- counter + 1
+  n_elites <- length(P) - length(O)
+  if(n_elites > 0){
+    new_P <- O
+    elite <- select_n_best(P, n_elites)
+    counter <- 1
+    while(counter <= n_elites) {
+      new_P[[length(O) + counter]] <- elite[[counter]]
+      counter <- counter + 1
+    }
+  }
+  else {
+    P_best <- select_n_best(P, 1)[[1]]
+    O_best <- select_n_best(O, length(P)-1)
+    new_P <- list(P_best)
+    for(i in 2:length(P)) {
+      new_P[[i]] <- O_best[[i-1]]
+    }
   }
   
   return (new_P)
 }
 
-select_n_best <- function(P, n) {
+select_n_best <- function(P, n, indices = F) {
   P_scores <- sapply(P, function(x){x$length})
   
+  if(!indices) return (P[order(P_scores)[1:n]])
   return (order(P_scores)[1:n])
 }
 
@@ -118,19 +132,19 @@ evo <- function(clusters, dt, mi, lambda, pc, reproduce_method = "basic") {
   else if(reproduce_method == "tourney") reproduce <- tourney_reproduce
   else stop("Invalid reproduce method.")
   
-  P <- generate_population(clusters, mi)
+  P <- generate_population(clusters, dt, mi)
   t <- 1
   best <<- P[[1]]
   n_steady_iterations <- 0
   while(T) {
     R <- reproduce(P, lambda)
-    X <- sample(c(0,1), (mi+lambda)/2, replace = T, prob = c(1-pc, pc))
+    X <- sample(c(F,T), (mi+lambda)/2, replace = T, prob = c(1-pc, pc))
     C <- cross(R, X, clusters, dt)
     O <- mutate(C)
     P <- succession(P, O)
     
-    current_best <- select_n_best(P, 1)
-    if(current_best < best){
+    current_best <- select_n_best(P, 1)[[1]]
+    if(current_best$length < best$length){
       best <<- current_best
       n_steady_iterations <- 0
     }

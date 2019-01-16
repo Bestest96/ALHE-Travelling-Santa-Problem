@@ -15,14 +15,14 @@ dist_cities <- function(x1, y1, x2, y2) {
   return (dist)
 }
 
-pathLength <- function(ord, cities = cities, city_primes = city_primes, toChange = NULL, old_length = NULL, old_paths = NULL) {
+pathLength <- function(ord, c = cities, c_p = city_primes, toChange = NULL, old_length = NULL, old_paths = NULL) {
   len <- 0.0
   if (is.null(toChange)) {
     paths <- double(length(ord) - 1)
     for (i in 1:(length(ord) - 1)) {
-      dist <- dist_cities(cities[ord[i + 1] + 1, 'X'], cities[ord[i + 1] + 1, 'Y'], 
-                          cities[ord[i] + 1, 'X'], cities[ord[i] + 1, 'Y'])
-      if (i %% 10 == 0 && !(ord[i] %in% city_primes)) {
+      dist <- dist_cities(c[ord[i + 1] + 1, 'X'], c[ord[i + 1] + 1, 'Y'], 
+                          c[ord[i] + 1, 'X'], c[ord[i] + 1, 'Y'])
+      if (i %% 10 == 0 && !(ord[i] %in% c_p)) {
         dist <- 1.1 * dist
       }
       len <- len + dist
@@ -38,12 +38,12 @@ pathLength <- function(ord, cities = cities, city_primes = city_primes, toChange
     len <- old_length
     paths <- old_paths
     while (i <= length(toChange)) {
-      c1 <- cities[ord[toChange[i]] + 1,]
-      p1 <- cities[ord[(toChange[i] - 1)] + 1,]
-      n1 <- cities[ord[(toChange[i] + 1)] + 1,]
-      c2 <- cities[ord[toChange[i + 1]] + 1,]
-      p2 <- cities[ord[(toChange[i + 1] - 1)] + 1,]
-      n2 <- cities[ord[(toChange[i + 1] + 1)] + 1,]
+      c1 <- c[ord[toChange[i]] + 1,]
+      p1 <- c[ord[(toChange[i] - 1)] + 1,]
+      n1 <- c[ord[(toChange[i] + 1)] + 1,]
+      c2 <- c[ord[toChange[i + 1]] + 1,]
+      p2 <- c[ord[(toChange[i + 1] - 1)] + 1,]
+      n2 <- c[ord[(toChange[i + 1] + 1)] + 1,]
       
       p1.c1 <- old_paths[toChange[i] - 1]
       p2.c2 <- old_paths[toChange[i + 1] - 1]
@@ -55,13 +55,13 @@ pathLength <- function(ord, cities = cities, city_primes = city_primes, toChange
       c2.n1 <- dist_cities(n1[,'X'], n1[,'Y'], c2[,'X'], c2[,'Y'])
       c1.n2 <- dist_cities(n2[,'X'], n2[,'Y'], c1[,'X'], c1[,'Y'])
       
-      if (toChange[i] %% 10 == 0 && !(ord[toChange[i + 1]] %in% city_primes))
+      if (toChange[i] %% 10 == 0 && !(ord[toChange[i + 1]] %in% c_p))
         c2.n1 <- 1.1 * c2.n1
-      else if (((toChange[i] - 1)) %% 10 == 0 && !(ord[((toChange[i] - 1))] %in% city_primes))
+      else if (((toChange[i] - 1)) %% 10 == 0 && !(ord[((toChange[i] - 1))] %in% c_p))
         p1.c2 <- 1.1 * p1.c2
-      if (toChange[i + 1] %% 10 == 0 && !(ord[toChange[i]] %in% city_primes))
+      if (toChange[i + 1] %% 10 == 0 && !(ord[toChange[i]] %in% c_p))
         c1.n2 <- 1.1 * c1.n2
-      else if (((toChange[i + 1] - 1)) %% 10 == 0 && !(ord[((toChange[i + 1] - 1))] %in% city_primes))
+      else if (((toChange[i + 1] - 1)) %% 10 == 0 && !(ord[((toChange[i + 1] - 1))] %in% c_p))
         p2.c1 <- 1.1 * p2.c1
       len <- len - p1.c1 - p2.c2 - c1.n1 - c2.n2 + p1.c2 + p2.c1 + c2.n1 + c1.n2
       p1.c2 -> paths[toChange[i] - 1]
