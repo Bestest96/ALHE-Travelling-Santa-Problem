@@ -131,8 +131,8 @@ select_n_best <- function(P, n, indices = F) {
 
 evo <- function(clusters, dt, mi, lambda, pc, reproduce_method = "basic") {
   if(reproduce_method == "basic") reproduce <- basic_reproduce
-  else if(reproduce_method == "threshold") reproduce <- threshold_reproduce
-  else if(reproduce_method == "tourney") reproduce <- tourney_reproduce
+  else if(reproduce_method == "threshold") reproduce <- function(P, lambda) threshold_reproduce(P, lambda, 0.5)
+  else if(reproduce_method == "tourney") reproduce <- function(P, lambda) tourney_reproduce(P, lambda, 3)
   else stop("Invalid reproduce method.")
   
   P <- generate_population(clusters, dt, mi)
