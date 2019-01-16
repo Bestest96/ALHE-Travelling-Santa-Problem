@@ -1,3 +1,6 @@
+source("load_cities.R")
+source("NN.R")
+
 generate_population <- function(clusters, dt, mi) {
   n_clusters <- max(clusters)
   P <- list()
