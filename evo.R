@@ -57,8 +57,8 @@ cross <- function(R, X, clusters, dt) {
       corder_1 <- R[[counter]]$c.order
       corder_2 <- R[[counter+1]]$c.order
       new_corder <- c(corder_1[1])
-      used <- c()
       idxs_to_fill <- c()
+      used <- c(clusters[1])
       for(i in 2:length(corder_1)) {
         x1 <- corder_1[i]
         x2 <- corder_2[i]
@@ -66,12 +66,12 @@ cross <- function(R, X, clusters, dt) {
         if(!(x1 %in% used)) xs <- c(xs, x1)
         if(!(x2 %in% used)) xs <- c(xs, x2)
         if(length(xs) == 0){
-          idxs_to_fill <- c(idxs_to_fill, i)
           new_corder <- c(new_corder, NaN)
+          idxs_to_fill <- c(idxs_to_fill, i)
         }
         else if(length(xs) == 1) {
-          used <- c(used, xs)
           new_corder <- c(new_corder, xs)
+          used <- c(used, xs)
         }
         else if(length(xs) == 2) {
           to_choose <- sample(1:2, 1)
@@ -79,9 +79,10 @@ cross <- function(R, X, clusters, dt) {
           used <- c(used, xs[to_choose])
         }
       }
-      to_fill <- setdiff(corder_1[-1], used)
-      new_corder[idxs_to_fill] <- sample(to_fill)
-      C[[organism]] <- list(c.order = new_corder, length = pathLength(NN(clusters, new_corder, dt))$length) 
+      to_fill <- setdiff(1:max(clusters), used)
+      if(length(idxs_to_fill) > 1) new_corder[idxs_to_fill] <- sample(to_fill)
+      else new_corder[idxs_to_fill] <- to_fill
+      C[[organism]] <- list(c.order = new_corder, length = calculate_length(clusters[1], new_corder, dt)) 
       
       counter <- counter + 2
     }
