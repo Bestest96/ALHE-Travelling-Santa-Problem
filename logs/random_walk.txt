@@ -1,0 +1,15 @@
+Iteration =	1	best length = 	447272644.946316
+Iteration =	5	best length = 	447171969.21403
+Iteration =	6	best length = 	447167905.509923
+Iteration =	26	best length = 	447027463.013827
+Iteration =	31	best length = 	446627369.632554
+Iteration =	98	best length = 	446464987.298795
+Iteration =	158	best length = 	446419252.71013
+Iteration =	204	best length = 	446400595.453442
+Iteration =	210	best length = 	446246332.693241
+Iteration =	255	best length = 	445843374.84833
+Iteration =	10428	best length = 	445689620.84347
+Iteration =	26004	best length = 	445557007.230363
+Iteration =	102968	best length = 	445373989.161977
+Iteration =	114803	best length = 	445306412.908028
+Iteration =	670848	best length = 	445049235.329824
