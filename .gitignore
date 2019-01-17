@@ -5,3 +5,4 @@
 *.rds
 *.txt
 *.png
+*.ipynb_checkpoints

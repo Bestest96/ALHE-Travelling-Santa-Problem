@@ -4,13 +4,11 @@ source("dist_table.R")
 .clusters <- NULL
 .dt <- NULL
 
-test_dist_table_with_brute <- function(n = 4, name = "test_dist_table_with_brute") {
+test_dist_table_with_brute <- function(n = 4) {
   if(is.null(.clusters)) .clusters <<- clusterify_cities(300, 9.3)[[3]]
   if(is.null(.dt)) .dt <<- create_cluster_dist_table(cities, .clusters)
   n_clusters <- max(.clusters)
   to_plot <- sample(1:n_clusters, n)
-  name <- paste(name, ".png", sep = "")
-  png(name, width = 1200, height = 800)
   
   plot(cities, col = "white")
   for (i in to_plot) {
@@ -40,17 +38,13 @@ test_dist_table_with_brute <- function(n = 4, name = "test_dist_table_with_brute
   for(i in to_plot) {
     points(convex_hulls[[i]], col = "yellow")
   }
-  
-  dev.off()
 }
 
-test_dist_table_pair <- function(n = 4, name = "test_dist_table_pair") {
+test_dist_table_pair <- function(n = 4) {
   if(is.null(.clusters)) .clusters <<- clusterify_cities(300, 9.3)[[3]]
   if(is.null(.dt)) .dt <<- create_cluster_dist_table(cities, .clusters)
   n_clusters <- max(.clusters)
   to_plot <- sample(1:n_clusters, n)
-  name <- paste(name, ".png", sep = "")
-  png(name, width = 1200, height = 800)
   
   plot(cities, col = "white")
   for (i in to_plot) {
@@ -75,6 +69,4 @@ test_dist_table_pair <- function(n = 4, name = "test_dist_table_pair") {
   for(i in to_plot) {
     points(convex_hulls[[i]], col = "yellow")
   }
-  
-  dev.off()
 }

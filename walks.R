@@ -1,6 +1,24 @@
 source("NN.R")
 source("load_cities.R")
 
+random_walk <- function() {
+  best_order <<- NULL
+  best_length <<- Inf
+  to_sample <- 1:(dim(cities)[1]-1)
+  i <- 1
+  while(T) {
+    order <- c(0, sample(to_sample), 0)
+    length <- pathLength(order)$length
+    if(cur_length < best_length) {
+      best_order <<- order
+      best_length <<- length
+      print.info(c(i, best_length))
+    }
+    if(i>=10000 && !(i%%10000==0)) cat("\r", i)
+    i <- i + 1
+  }
+}
+
 cluster_random_walk <- function(clusters, first_cluster, dt, iterations = 200) {
   best_length <<- Inf
   best_corder <<- NULL

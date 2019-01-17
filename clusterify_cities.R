@@ -15,7 +15,8 @@ clusterify_and_plot_cities <- function(radius,
                                        directory = "plots/",
                                        id = 1,
                                        width = 1200,
-                                       height = 800) {
+                                       height = 800,
+                                       on_screen = FALSE) {
   clusterify_and_plot(cities,
                       radius,
                       per_attractor,
@@ -25,7 +26,8 @@ clusterify_and_plot_cities <- function(radius,
                       directory = directory,
                       id = id,
                       width = width,
-                      height = height)
+                      height = height,
+                      on_screen = on_screen)
 }
 
 tune_clusterify_cities <- function(radius = seq(250, 500, 25), 

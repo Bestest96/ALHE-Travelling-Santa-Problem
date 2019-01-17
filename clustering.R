@@ -242,20 +242,23 @@ clusterify <- function(X,
 
 plot_clusters <- function(X, 
                           y, 
-                          params = c("clusters"), 
+                          params = c("clusters"),
+                          on_screen = FALSE, 
                           width = 1200, 
                           height = 800, 
                           directory = 'plots/') {
   parsed_params <- paste(params, collapse = '_')
-  name <- paste(directory, "/", parsed_params, ".png", sep = "")
-  png(name, width = width, height = height)
   
+  if(!on_screen) {
+    name <- paste(directory, "/", parsed_params, ".png", sep = "")
+    png(name, width = width, height = height)
+  }
   plot(X)
   for (i in unique(y)) {
     if(i == 0) points(X[y==0,], pch = 3, col = "black") 
     points(X[y==i,], pch = 19, col = colors[i])
   }
-  dev.off()
+  if(!on_screen) dev.off()
 }
 
 "
@@ -283,6 +286,7 @@ clusterify_and_plot <- function(X,
                                 attractors,
                                 post_clusterify = TRUE,
                                 metric = dist_cities,
+                                on_screen = FALSE,
                                 directory = "plots/",
                                 id = 1,
                                 width = 1200,
@@ -300,12 +304,14 @@ clusterify_and_plot <- function(X,
   plot_clusters(X, 
                 clusters, 
                 c(radius, per_attractor_str, id, remaining_idxs, "noise"),
-                directory = directory)
+                directory = directory,
+                on_screen = on_screen)
   if(F && post_clusterify) { # CHANGE
     plot_clusters(X,
                   post_clusters,
                   c(radius, per_attractor_str, id, remaining_idxs, "no_noise"),
-                  directory = directory)
+                  directory = directory,
+                  on_screen = on_screen)
   }
   
   return (list(clusters, remaining_idxs, post_clusters))
