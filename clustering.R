@@ -215,10 +215,10 @@ clusterify <- function(X,
     neighbourhood_size <- length(neighbours_idxs)
     n_normal_points <- neighbourhood_size - n_attractors
     remaining_idxs <- setdiff(remaining_idxs, neighbours_idxs)
-    printf("total_attractors = %d, attractors = %d, normal points = %d", 
-           length(remaining_attractors),
-           n_attractors, 
-           n_normal_points)
+    print.debug(sprintf("total_attractors = %d, attractors = %d, normal points = %d", 
+                        length(remaining_attractors),
+                        n_attractors, 
+                        n_normal_points))
     if (length(remaining_attractors) - old.length == 0)
       not.changed <- not.changed + 1
     else{
@@ -235,7 +235,7 @@ clusterify <- function(X,
     post_clusters <- clusterify_noise(X, clusters, attractors, metric = metric)
   }
   
-  print(length(remaining_idxs))
+  print.debug(length(remaining_idxs))
   
   return (list(clusters, length(remaining_idxs), post_clusters))
 }

@@ -48,7 +48,7 @@ create_cluster_dist_table <- function(points, clusters) {
       rv[i,j,1,] <- c(p1,p2)
       rv[i,j,2,] <- c(p1_2,p2_2)
     }
-    print(i/n_clusters * 100)
+    print.debug(i/n_clusters * 100)
   }
   
   return (rv)

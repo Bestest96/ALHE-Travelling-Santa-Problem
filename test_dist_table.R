@@ -30,7 +30,7 @@ test_dist_table_with_brute <- function(n = 4) {
       segments(x1[[1]], x1[[2]], x2[[1]], x2[[2]], col = "blue", lwd = 1)
       
       step <- step + 1
-      print(100*step/n_step)
+      print.debug(100*step/n_step)
     }
   }
   
@@ -61,7 +61,7 @@ test_dist_table_pair <- function(n = 4) {
       segments(.dt[i,j,2,1], .dt[i,j,2,2], .dt[i,j,2,3], .dt[i,j,2,4], col = "red", lwd = 1)
       
       step <- step + 1
-      print(100*step/n_step)
+      print.debug(100*step/n_step)
     }
   }
   

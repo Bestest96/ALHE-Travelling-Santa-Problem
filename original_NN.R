@@ -29,7 +29,7 @@ for (i in 1:(length(order) - 2)) {
   order[i + 1] <- min_neigh
   path_length <- path_length + min_dist
   paths[i] <- min_dist
-  cat("\r", i, ",", path_length)
+  print.debug("\r", i, ",", path_length)
 }
 last_len <- dist_cities(cities[order[i + 1] + 1, 'X'], cities[order[i + 1] + 1, 'Y'], cities[1, 'X'], cities[1, 'Y'])
 paths[i + 1] <- last_len

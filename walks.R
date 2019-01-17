@@ -14,7 +14,7 @@ random_walk <- function() {
       best_length <<- length
       print.info(c(i, best_length))
     }
-    if(i>=10000 && !(i%%10000==0)) cat("\r", i)
+    if(i>=10000 && !(i%%10000==0)) print.debug("\r", i)
     i <- i + 1
   }
 }
@@ -61,7 +61,7 @@ best_walk <- function(order) {
       best_length <<- cur_length
       best_order <<- cur_order
       to_sample <- 2:(length(order)-2)
-      print("")
+      print.info("")
       print.info(c("Iteration =", i, "best length = ", best_length))
     }
     else {
@@ -70,7 +70,7 @@ best_walk <- function(order) {
       to_sample <- to_sample[-(to_change - 1)]
     }
     
-    cat("\r", i, cur_length)
+    print.debug("\r", i, cur_length)
     i <- i + 1
   }
 }

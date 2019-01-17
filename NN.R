@@ -68,9 +68,9 @@ NN <- function(clusters, c.order, dt) {
     order[counter] <- min_neigh
     to_check <- setdiff(to_check, min_neigh)
     counter <- counter + 1
-    cat("\r", counter)
+    print.debug("\r", counter)
   }
-  cat ("\n")
+  print.debug("\n")
   return (order)
 }
 

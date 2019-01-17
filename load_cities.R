@@ -6,6 +6,8 @@ if (!require("sfsmisc")) {
   }
 }
 
+DEBUG <- FALSE
+
 cities <- read.csv("cities.csv", header = T)
 cities <- cities[,2:3]
 city_primes <- primes(dim(cities)[1] - 1)
@@ -34,3 +36,5 @@ print.info <- function(params, logger = NULL) {
   if (!is.null(logger))
     write(paste(params, collapse = '\t'), logger, sep = '\t', append = T)
 }
+
+print.debug <- function(...) if(DEBUG) cat(...)
