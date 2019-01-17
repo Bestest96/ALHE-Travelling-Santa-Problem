@@ -43,7 +43,7 @@ best_walk <- function(order) {
       best_length <<- cur_length
       best_order <<- cur_order
       to_sample <- 2:(length(order)-2)
-      print()
+      print("")
       print.info(c("Iteration =", i, "best length = ", best_length))
     }
     else {
